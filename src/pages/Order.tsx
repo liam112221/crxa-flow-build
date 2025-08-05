@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -121,28 +121,44 @@ const Order = () => {
                     Pilih layanan yang sesuai dengan kebutuhan Anda
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <RadioGroup 
-                    value={formData.service} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, service: value }))}
-                  >
-                    {services.map((service) => (
-                      <div key={service.id} className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                        <RadioGroupItem value={service.id} id={service.id} className="mt-1" />
-                        <div className="flex-1">
-                          <Label htmlFor={service.id} className="font-medium cursor-pointer">
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Pilih Layanan</Label>
+                    <Select 
+                      value={formData.service} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, service: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih jenis layanan..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {services.map((service) => (
+                          <SelectItem key={service.id} value={service.id}>
                             {service.name}
-                          </Label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {service.description}
-                          </p>
-                          <p className="text-sm font-medium text-primary mt-2">
-                            Range Harga: {service.priceRange}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </RadioGroup>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {formData.service && (
+                    <div className="p-4 border rounded-lg bg-accent/20">
+                      {(() => {
+                        const selectedService = services.find(s => s.id === formData.service);
+                        return selectedService ? (
+                          <div>
+                            <h4 className="font-medium">{selectedService.name}</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {selectedService.description}
+                            </p>
+                            <p className="text-sm font-medium text-primary mt-2">
+                              Range Harga: {selectedService.priceRange}
+                            </p>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
