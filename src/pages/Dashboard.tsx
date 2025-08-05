@@ -7,19 +7,15 @@ import { Plus, ExternalLink, MessageCircle, LogOut } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([
-    // Sample data - will be replaced with Supabase data
-    {
-      id: "ORD-001",
-      service: "Pembuatan Website",
-      status: "Menunggu Persetujuan Admin",
-      description: "Website company profile untuk toko online sepatu",
-      budget: 5000000,
-      createdAt: "2024-01-15",
-      demoLink: null,
-      finalLink: null
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    // Load orders from localStorage (will be replaced with Supabase)
+    const savedOrders = localStorage.getItem('userOrders');
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
     }
-  ]);
+  }, []);
 
   const handleLogout = () => {
     navigate('/');

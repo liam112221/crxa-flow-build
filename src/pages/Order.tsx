@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+
 const Order = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -52,18 +53,35 @@ const Order = () => {
 
       // Calculate DP (10%)
       const dpAmount = Math.round(budget * 0.1);
-
-      // Simulate order creation and redirect to payment
       const orderId = `ORD-${Date.now()}`;
       
+      // Create order object
+      const orderData = {
+        id: orderId,
+        service: formData.service,
+        description: formData.description,
+        budget: budget,
+        dpAmount: dpAmount,
+        status: "Menunggu Pembayaran DP",
+        createdAt: new Date().toISOString()
+      };
+
+      // Save to localStorage temporarily (will be replaced with Supabase)
+      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+      existingOrders.push(orderData);
+      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
+
       toast({
         title: "Pesanan berhasil dibuat!",
-        description: `ID Pesanan: ${orderId}. Anda akan diarahkan ke pembayaran DP.`,
+        description: `ID Pesanan: ${orderId}. Mengarahkan ke pembayaran DP...`,
       });
 
-      // Here we would integrate with iPaymu payment gateway
-      // For now, redirect back to dashboard
+      // TODO: Integrate with iPaymu payment gateway
+      // For now, simulate payment redirect
       setTimeout(() => {
+        // This should redirect to iPaymu payment page
+        // Example: window.location.href = paymentUrl;
+        alert(`Redirect ke pembayaran iPaymu\nJumlah DP: Rp ${dpAmount.toLocaleString('id-ID')}\nOrder ID: ${orderId}`);
         navigate('/dashboard');
       }, 2000);
 
