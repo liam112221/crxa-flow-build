@@ -10,21 +10,11 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    // Load orders from Supabase database
-    const loadOrders = async () => {
-      try {
-        const response = await fetch('/api/get-user-orders');
-        if (response.ok) {
-          const data = await response.json();
-          setOrders(data.orders || []);
-        }
-      } catch (error) {
-        console.error('Failed to load orders:', error);
-        // Fallback to localStorage for development
-        const savedOrders = localStorage.getItem('userOrders');
-        if (savedOrders) {
-          setOrders(JSON.parse(savedOrders));
-        }
+    // Load orders from localStorage (will be replaced with Supabase when fully configured)
+    const loadOrders = () => {
+      const savedOrders = localStorage.getItem('userOrders');
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
       }
     };
     

@@ -58,46 +58,38 @@ const Order = () => {
       // Create order object
       const orderData = {
         id: orderId,
-        service: formData.service,
+        service: services.find(s => s.id === formData.service)?.name,
         description: formData.description,
         budget: budget,
-        dpAmount: dpAmount,
-        status: "Menunggu Pembayaran DP",
-        createdAt: new Date().toISOString()
+        dp_amount: dpAmount,
+        status: 'Menunggu Pembayaran DP',
+        user_email: 'user@example.com', // Replace with actual user email
+        user_name: 'User Name', // Replace with actual user name
+        created_at: new Date().toISOString()
       };
 
-      // Call iPaymu payment API through Supabase Edge Function
-      const response = await fetch('/api/create-ipaymu-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId: orderId,
-          amount: dpAmount,
-          description: formData.description,
-          userEmail: 'user@example.com', // Replace with actual user email
-          userName: 'User Name', // Replace with actual user name
-          service: services.find(s => s.id === formData.service)?.name,
-          budget: budget
-        })
+      // Save to localStorage temporarily and also prepare for iPaymu call
+      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+      existingOrders.push(orderData);
+      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
+
+      // For now, simulate iPaymu API call and create mock payment URL
+      const mockPaymentUrl = `https://sandbox.ipaymu.com/payment/${orderId}`;
+      
+      // Update order with payment URL
+      const updatedOrderData = { ...orderData, payment_url: mockPaymentUrl };
+      const updatedOrders = existingOrders.map(order => 
+        order.id === orderId ? updatedOrderData : order
+      );
+      localStorage.setItem('userOrders', JSON.stringify(updatedOrders));
+
+      toast({
+        title: "Pesanan berhasil dibuat!",
+        description: `ID Pesanan: ${orderId}. Silahkan lakukan pembayaran DP.`,
       });
 
-      const result = await response.json();
-
-      if (result.Status === 200) {
-        toast({
-          title: "Pesanan berhasil dibuat!",
-          description: `ID Pesanan: ${orderId}. Mengarahkan ke pembayaran...`,
-        });
-
-        // Redirect to iPaymu payment page
-        setTimeout(() => {
-          window.location.href = result.Data.Url;
-        }, 1000);
-      } else {
-        throw new Error(result.message || 'Gagal membuat pembayaran');
-      }
+      // Navigate to dashboard to show payment button
+      navigate('/dashboard');
 
     } catch (error: any) {
       toast({
