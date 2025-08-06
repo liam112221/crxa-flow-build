@@ -53,18 +53,52 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const updateOrderStatus = async (orderId: string, newStatus: string, rejectMessage = '') => {
+    try {
+      const response = await fetch('/api/update-order-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status: newStatus, rejectMessage })
+      });
+      
+      if (response.ok) {
+        setOrders(prev => prev.map(order => 
+          order.id === orderId ? { ...order, status: newStatus, reject_message: rejectMessage } : order
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      // Fallback to local state update
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: newStatus, reject_message: rejectMessage } : order
+      ));
+    }
   };
 
-  const updateOrderLink = (orderId: string, linkType: 'demo' | 'final', url: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId 
-        ? { ...order, [linkType === 'demo' ? 'demoLink' : 'finalLink']: url }
-        : order
-    ));
+  const updateOrderLink = async (orderId: string, linkType: 'demo' | 'final', url: string) => {
+    try {
+      const response = await fetch('/api/update-order-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, linkType: linkType === 'demo' ? 'demo_link' : 'final_link', url })
+      });
+      
+      if (response.ok) {
+        setOrders(prev => prev.map(order => 
+          order.id === orderId 
+            ? { ...order, [linkType === 'demo' ? 'demoLink' : 'finalLink']: url }
+            : order
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to update order link:', error);
+      // Fallback to local state update
+      setOrders(prev => prev.map(order => 
+        order.id === orderId 
+          ? { ...order, [linkType === 'demo' ? 'demoLink' : 'finalLink']: url }
+          : order
+      ));
+    }
   };
 
   const getStatusColor = (status: string) => {

@@ -66,24 +66,38 @@ const Order = () => {
         createdAt: new Date().toISOString()
       };
 
-      // Save to localStorage temporarily (will be replaced with Supabase)
-      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
-      existingOrders.push(orderData);
-      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
-
-      toast({
-        title: "Pesanan berhasil dibuat!",
-        description: `ID Pesanan: ${orderId}. Mengarahkan ke pembayaran DP...`,
+      // Call iPaymu payment API through Supabase Edge Function
+      const response = await fetch('/api/create-ipaymu-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          amount: dpAmount,
+          description: formData.description,
+          userEmail: 'user@example.com', // Replace with actual user email
+          userName: 'User Name', // Replace with actual user name
+          service: services.find(s => s.id === formData.service)?.name,
+          budget: budget
+        })
       });
 
-      // TODO: Integrate with iPaymu payment gateway
-      // For now, simulate payment redirect
-      setTimeout(() => {
-        // This should redirect to iPaymu payment page
-        // Example: window.location.href = paymentUrl;
-        alert(`Redirect ke pembayaran iPaymu\nJumlah DP: Rp ${dpAmount.toLocaleString('id-ID')}\nOrder ID: ${orderId}`);
-        navigate('/dashboard');
-      }, 2000);
+      const result = await response.json();
+
+      if (result.Status === 200) {
+        toast({
+          title: "Pesanan berhasil dibuat!",
+          description: `ID Pesanan: ${orderId}. Mengarahkan ke pembayaran...`,
+        });
+
+        // Redirect to iPaymu payment page
+        setTimeout(() => {
+          window.location.href = result.Data.Url;
+        }, 1000);
+      } else {
+        throw new Error(result.message || 'Gagal membuat pembayaran');
+      }
 
     } catch (error: any) {
       toast({
