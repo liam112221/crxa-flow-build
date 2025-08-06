@@ -55,7 +55,10 @@ const Order = () => {
       const dpAmount = Math.round(budget * 0.1);
       const orderId = `ORD-${Date.now()}`;
       
-      // Create order object
+      // For now, simulate iPaymu API call and create mock payment URL
+      const mockPaymentUrl = `https://sandbox.ipaymu.com/payment/${orderId}`;
+      
+      // Create order object with payment URL
       const orderData = {
         id: orderId,
         service: services.find(s => s.id === formData.service)?.name,
@@ -63,25 +66,16 @@ const Order = () => {
         budget: budget,
         dp_amount: dpAmount,
         status: 'Menunggu Pembayaran DP',
+        payment_url: mockPaymentUrl,
         user_email: 'user@example.com', // Replace with actual user email
         user_name: 'User Name', // Replace with actual user name
         created_at: new Date().toISOString()
       };
 
-      // Save to localStorage temporarily and also prepare for iPaymu call
+      // Save to localStorage temporarily
       const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
       existingOrders.push(orderData);
       localStorage.setItem('userOrders', JSON.stringify(existingOrders));
-
-      // For now, simulate iPaymu API call and create mock payment URL
-      const mockPaymentUrl = `https://sandbox.ipaymu.com/payment/${orderId}`;
-      
-      // Update order with payment URL
-      const updatedOrderData = { ...orderData, payment_url: mockPaymentUrl };
-      const updatedOrders = existingOrders.map(order => 
-        order.id === orderId ? updatedOrderData : order
-      );
-      localStorage.setItem('userOrders', JSON.stringify(updatedOrders));
 
       toast({
         title: "Pesanan berhasil dibuat!",
