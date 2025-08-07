@@ -30,6 +30,7 @@ export type Database = {
           status: string
           updated_at: string
           user_email: string
+          user_id: string | null
           user_name: string
         }
         Insert: {
@@ -47,6 +48,7 @@ export type Database = {
           status?: string
           updated_at?: string
           user_email: string
+          user_id?: string | null
           user_name: string
         }
         Update: {
@@ -64,7 +66,43 @@ export type Database = {
           status?: string
           updated_at?: string
           user_email?: string
+          user_id?: string | null
           user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
         }
         Relationships: []
       }

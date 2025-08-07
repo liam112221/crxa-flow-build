@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { orderId, amount, description, userEmail, userName, service, budget } = await req.json();
+    const { orderId, amount, description, userEmail, userName, service, budget, userId } = await req.json();
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -62,6 +62,7 @@ serve(async (req) => {
         .from('orders')
         .insert({
           id: orderId,
+          user_id: userId,
           service: service,
           description: description,
           budget: budget,

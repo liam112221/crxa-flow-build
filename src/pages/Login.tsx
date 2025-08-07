@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-// import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
@@ -25,25 +25,43 @@ const Login = () => {
     setError("");
 
     try {
-      // Temporary login logic - will be replaced with Supabase auth
       if (!email || !password) {
         throw new Error("Email dan password harus diisi");
       }
 
-      // Check for admin login
-      if (email === "carakawidi07@gmail.com" && password === "caraka1928") {
-        navigate('/admin');
-        toast({
-          title: "Login admin berhasil!",
-          description: "Selamat datang, Admin.",
-        });
-      } else {
-        // Regular user login (for demo purposes)
-        navigate('/dashboard');
-        toast({
-          title: "Login berhasil!",
-          description: "Selamat datang kembali.",
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        // Fetch user profile to check role
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          navigate('/dashboard');
+        } else if (profile?.role === 'admin') {
+          navigate('/admin');
+          toast({
+            title: "Login admin berhasil!",
+            description: "Selamat datang, Admin.",
+          });
+        } else {
+          navigate('/dashboard');
+          toast({
+            title: "Login berhasil!",
+            description: "Selamat datang kembali.",
+          });
+        }
       }
     } catch (error: any) {
       setError(error.message);

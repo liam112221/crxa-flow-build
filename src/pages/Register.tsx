@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ArrowLeft, User, Mail, Lock } from "lucide-react";
 
@@ -49,12 +50,26 @@ const Register = () => {
     }
 
     try {
-      // For now, we'll just show success and redirect to login
-      // This will be replaced with actual Supabase auth when available
+      const redirectUrl = `${window.location.origin}/`;
       
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: formData.fullName,
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Registrasi berhasil!",
-        description: "Akun Anda telah dibuat. Silakan login untuk melanjutkan.",
+        description: "Silakan cek email Anda untuk konfirmasi akun, lalu login.",
       });
       
       navigate('/login');

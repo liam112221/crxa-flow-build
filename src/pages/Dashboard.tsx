@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, ExternalLink, MessageCircle, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,8 @@ const Dashboard = () => {
     fetchOrders();
   }, [toast]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/');
   };
 

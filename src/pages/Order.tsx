@@ -10,11 +10,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 
 const Order = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   
   const [formData, setFormData] = useState({
     service: "",
@@ -62,10 +64,11 @@ const Order = () => {
           orderId,
           amount: dpAmount,
           description: `DP untuk ${services.find(s => s.id === formData.service)?.name}`,
-          userEmail: 'user@example.com', // Replace with actual user email
-          userName: 'User Name', // Replace with actual user name
+          userEmail: user?.email || 'user@example.com',
+          userName: profile?.full_name || 'User Name',
           service: services.find(s => s.id === formData.service)?.name,
-          budget: budget
+          budget: budget,
+          userId: user?.id
         }
       });
 
