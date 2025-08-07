@@ -4,22 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ExternalLink, MessageCircle, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load orders from localStorage (will be replaced with Supabase when fully configured)
-    const loadOrders = () => {
-      const savedOrders = localStorage.getItem('userOrders');
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
+    const fetchOrders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching orders:', error);
+          toast({
+            title: "Gagal memuat pesanan",
+            description: "Tidak dapat mengambil data pesanan dari server",
+            variant: "destructive",
+          });
+        } else {
+          setOrders(data || []);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    
-    loadOrders();
-  }, []);
+
+    fetchOrders();
+  }, [toast]);
 
   const handleLogout = () => {
     navigate('/');
@@ -115,7 +135,7 @@ const Dashboard = () => {
                             </Badge>
                           </CardTitle>
                           <CardDescription>
-                            ID Pesanan: {order.id} • Dibuat: {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                            ID Pesanan: {order.id} • Dibuat: {new Date(order.created_at).toLocaleDateString('id-ID')}
                           </CardDescription>
                         </div>
                         <div className="text-right">

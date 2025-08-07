@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Order = () => {
@@ -55,27 +56,26 @@ const Order = () => {
       const dpAmount = Math.round(budget * 0.1);
       const orderId = `ORD-${Date.now()}`;
       
-      // For now, simulate iPaymu API call and create mock payment URL
-      const mockPaymentUrl = `https://sandbox.ipaymu.com/payment/${orderId}`;
-      
-      // Create order object with payment URL
-      const orderData = {
-        id: orderId,
-        service: services.find(s => s.id === formData.service)?.name,
-        description: formData.description,
-        budget: budget,
-        dp_amount: dpAmount,
-        status: 'Menunggu Pembayaran DP',
-        payment_url: mockPaymentUrl,
-        user_email: 'user@example.com', // Replace with actual user email
-        user_name: 'User Name', // Replace with actual user name
-        created_at: new Date().toISOString()
-      };
+      // Call iPaymu API through edge function
+      const { data, error } = await supabase.functions.invoke('create-ipaymu-payment', {
+        body: {
+          orderId,
+          amount: dpAmount,
+          description: `DP untuk ${services.find(s => s.id === formData.service)?.name}`,
+          userEmail: 'user@example.com', // Replace with actual user email
+          userName: 'User Name', // Replace with actual user name
+          service: services.find(s => s.id === formData.service)?.name,
+          budget: budget
+        }
+      });
 
-      // Save to localStorage temporarily
-      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
-      existingOrders.push(orderData);
-      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
+      if (error) {
+        throw new Error('Gagal membuat pembayaran: ' + error.message);
+      }
+
+      if (data.Status !== 200) {
+        throw new Error('Gagal membuat pembayaran: ' + data.Message);
+      }
 
       toast({
         title: "Pesanan berhasil dibuat!",
